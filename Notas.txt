@@ -44,3 +44,26 @@ cambiar get -> http://localhost:8080/index.php?r=site%2Fsaluda&get=%27aaa%27
 http://localhost:8080/index.php?r=site/formulario
 
 r=nombreControlador/nombreAccion
+
+            acciones todo en minusculas
+
+MODELOS:
+
+primera letra de cada palabra en mayusculas -> ValidarFormulario
+
+para Cambiar los labels desde php 
+    // poder cambiar etiquetas label de cada campo
+        public function attributeLabels(){
+            return [
+                'nombre' => 'Nombre: ',
+                'email' => 'Email: '
+            ];
+        }
+        Vista -----
+        <div class="form-group">
+            <?= $form->field($model,"nombre")->input("text");?>
+        </div>
+
+        <div class="form-group">
+            <?= $form->field($model,"email")->input("email");?>
+        </div>

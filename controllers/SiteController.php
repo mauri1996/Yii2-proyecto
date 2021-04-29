@@ -9,6 +9,7 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use app\models\ValidarFormulario; // agregar el nuevo modelo creado
 
 class SiteController extends Controller
 {
@@ -165,6 +166,21 @@ class SiteController extends Controller
                             //"nombre" => $name
                         ] 
             );
+    }
+
+    public function actionValidarformulario(){
+        $model = new ValidarFormulario();
+        if($model->load(Yii::$app->request->post())){  // si enviamos el formulario
+            if($model->validate()){ // si el formulario es valido
+
+                //Consultar base de datos, a que los datos han sido correctos.
+                // o mostrar errores
+            }else{
+                $model->getErrors();
+            }
+        }
+
+        return $this->render('validarformulario',['model'=>$model]);
     }
 
     public function actionFormulario($mensaje = null){
