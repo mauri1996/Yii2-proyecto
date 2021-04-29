@@ -1,0 +1,46 @@
+instalar composer
+composer global require "yiisoft/yii2-composer"  -> instala yii
+
+composer create-project --prefer-dist yiisoft/yii2-app-basic basic -> crea carpeta proyecto basic
+
+
+
+php yii serve -> levanta el servidor dentro de la carpeta
+
+error del la vista contact:
+descomentar la linea:
+extension=gd  -> de php.ini de php
+
+
+en sitecontroller
+  public function actionSaluda()
+    {
+        return $this->render('saluda');
+    }
+
+vista
+	site/saluda.php
+
+llamada url -> http://localhost:8080/index.php?r=site%2Fsaluda
+
+
+enviar parametros por funciones:
+public function actionSaluda($get = 'hola desde parametro')
+    {
+        $mensaje = "hola mundo";
+        $numeros= [1,2,3,4,5];
+        return $this->render('saluda',
+            [
+                'mensajes' => $mensaje,
+                'arreglo' => $numeros,
+                'get' => $get
+            ]
+        );
+        
+    }
+
+cambiar get -> http://localhost:8080/index.php?r=site%2Fsaluda&get=%27aaa%27
+
+http://localhost:8080/index.php?r=site/formulario
+
+r=nombreControlador/nombreAccion
