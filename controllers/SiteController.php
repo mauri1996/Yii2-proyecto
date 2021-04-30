@@ -25,6 +25,8 @@ use app\models\FormAlumnos;
 use app\models\FormSearch;
 use yii\helpers\Html; // usa enconde para prevenir ataques
 
+use yii\data\Pagination; // para paginacion
+
 class SiteController extends Controller
 {
     public function actionCreate(){
@@ -62,27 +64,67 @@ class SiteController extends Controller
     }
 
     public function actionView(){
-        $table = new Alumnos();
-        $model = $table->find()->all();
-        //$model = Alumnos::find()->all(); // todos lso registros de la tabla alumnos
+        // ANTES DE LA PAGINACION
+        // $table = new Alumnos();
+        // $model = $table->find()->all();
+        // //$model = Alumnos::find()->all(); // todos lso registros de la tabla alumnos
+
+        // $form = new FormSearch();
+        // $search =null;
+
+        // if($form->load(Yii::$app->request->post())){
+        //     if($form->validate()){
+        //         $search = Html::encode($form->q); // previene ataques
+        //         $querry = "SELECT * FROM alumnos where id_alumno LIKE '%$search%' OR ";
+        //         $querry.="nombre LIKE '%$search%' OR apellidos LIKE '%$search%'";
+
+        //         $model = $table->findBySql($querry)->all();
+        //     }else{
+        //         $form->getErrors();
+        //     }
+        // }
 
         $form = new FormSearch();
-        $search =null;
-
-        if($form->load(Yii::$app->request->post())){
+        $search=null;
+        if($form->load(Yii::$app->request->post())){ // si el fomulario es enviado            
             if($form->validate()){
-                $search = Html::encode($form->q); // previene ataques
-                $querry = "SELECT * FROM alumnos where id_alumno LIKE '%$search%' OR ";
-                $querry.="nombre LIKE '%$search%' OR apellidos LIKE '%$search%'";
-
-                $model = $table->findBySql($querry)->all();
+                $search = Html::encode($form->q); // hace q lo q s emande por el imput sea solo texto
+                $table = Alumnos::find()
+                            ->where(['like',"id_alumno",$search])
+                            ->orWhere(['like','nombre',$search])
+                            ->orWhere(['like','apellidos',$search]);
+                $count = clone $table; // clona la tabla
+                $pages =  new Pagination([   //parametros de la paginacion
+                        'pageSize' =>1,
+                        'totalCount'=>$count->count()
+                ]);
+                // generacion del modelo con la paginacion y los limites
+                $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
             }else{
                 $form->getErrors();
             }
+        }else{            
+            $table = Alumnos::find();
+            $count = clone $table;
+
+            $pages = new Pagination([
+                'pageSize'=>1,
+                'totalCount' => $count->count()
+            ]);
+            $model = $table
+                        ->offset($pages->offset)
+                        ->limit($pages->limit)
+                        ->all();
         }
 
-        return $this->render('view',['model'=>$model,'form' => $form , 'search' =>$search]);
+        //return $this->render('view',['model'=>$model,'form' => $form , 'search' =>$search]);
+        return $this->render('view',['model'=>$model,'form' => $form , 'search' =>$search, 'pages'=>$pages]);
     }
+
+
     
     /**
      * {@inheritdoc}

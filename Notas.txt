@@ -105,3 +105,19 @@ Enviarlo a la vista y en la vsta:
             <td><a href="#">Eliminar</a></td>
         </tr>
     <?php endforeach?>
+
+----- PAGINACION 
+$pages =  new Pagination([   //parametros de la paginacion
+                        'pageSize' =>1,
+                        'totalCount'=>$count->count()
+                ]);
+                // generacion del modelo con la paginacion y los limites
+                $model = $table
+                            ->offset($pages->offset)
+                            ->limit($pages->limit)
+                            ->all();
+se debe enviar la $pages a la vista y al final de la vista usar:
+    <?= // paginacion
+        LinkPager::widget([
+            'pagination'=>$pages,
+        ]); ?>

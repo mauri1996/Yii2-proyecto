@@ -4,6 +4,10 @@ use yii\helpers\Html; // trbjar con html
 use yii\widgets\ActiveForm; // activar formulario de busqueda
 
 
+/// para paginacion
+use yii\data\Pagination;
+use yii\widgets\LinkPager;
+
 $this->title = 'Lista de alumnos';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
@@ -52,3 +56,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
 </table>
 
+<?= // paginacion
+    LinkPager::widget([
+        'pagination'=>$pages,
+    ]); ?>
