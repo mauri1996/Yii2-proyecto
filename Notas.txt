@@ -67,3 +67,13 @@ para Cambiar los labels desde php
         <div class="form-group">
             <?= $form->field($model,"email")->input("email");?>
         </div>
+
+CONECTAR A BASE DE DATOS  -> config/db.php
+
+se debe tener 1 modelo para el formulario (FormAlumnos) y otro para manejar la conexion a la db(Alumnos)
+
+$model->load(Yii::$app->request->post() // cada vez que se hace una peticion carga $model con los datos del formulario, si se borra los datos del modelo tmbn se borraran en el formulario
+                                            $model->nombre = null;
+
+se instancia una tabla del modelo de Alumnos $table = new Alumnos(); 
+    $table->insert() inserta el modelo en la base de datos

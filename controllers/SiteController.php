@@ -10,9 +10,52 @@ use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
 use app\models\ValidarFormulario; // agregar el nuevo modelo creado
+use app\models\ValidarFormularioAjax; // agregar el nuevo modelo creadocon ajax
+
+// para trabajr con ajax
+ use yii\widgets\ActiveForm;
+ //use yii\web\response; ya esta importdo
+
+ //trabajar con conexion a la db
+use app\models\Alumnos;
+use app\models\FormAlumnos;
 
 class SiteController extends Controller
 {
+    public function actionCreate(){
+        $model = new FormAlumnos();
+        $msg = null;
+
+        if($model->load(Yii::$app->request->post())){
+            if($model->validate()){
+                
+                $table = new Alumnos();
+                $table->nombre = $model->nombre;
+                $table->apellidos = $model->apellidos;
+                $table->clase = $model->clase;
+                $table->nota_final = $model->nota_final;
+                
+                if($table->insert()){
+                    $msg= 'Resgistro insertados correctamente';
+                    $model->nombre = null;
+                    $model->apellidos = null;
+                    $model->clase = null;
+                    $model->nota_final = null;
+                }else{
+                    $msg= 'Ha aocurrido un error al insertar el registro';
+                }
+
+            }else{
+                $model->getErrors();
+            }
+        }
+
+        return $this->render('create', [
+                                        'model'=>$model,
+                                        'msg'=>$msg 
+                                        ]);
+    }
+    
     /**
      * {@inheritdoc}
      */
@@ -185,6 +228,30 @@ class SiteController extends Controller
 
     public function actionFormulario($mensaje = null){
         return $this->render('formulario',['mensaje' => $mensaje]);
+    }
+
+    public function actionValidarformularioajax(){
+        $model = new ValidarFormularioAjax();
+        $msg = null;
+
+        if ($model->load(Yii::$app->request->post()) && Yii::$app->request->isAjax){ // verificia si se envia post y si es ajax
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($model);            
+        }
+
+        if ($model->load(Yii::$app->request->post())){ // verificia si se envia post
+            if($model->validate()){
+                //
+                $msg = "Formulario enviado correctamente";
+                // borrar campos
+                $model->nombre = null;
+                $model ->email = null;
+            }else{
+                $model->getErrors();
+            }            
+        }
+
+        return $this->render('validarformularioajax',['model' => $model, 'msg'=>$msg]);
     }
 
 }
