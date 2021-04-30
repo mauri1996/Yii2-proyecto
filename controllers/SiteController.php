@@ -20,6 +20,11 @@ use app\models\ValidarFormularioAjax; // agregar el nuevo modelo creadocon ajax
 use app\models\Alumnos;
 use app\models\FormAlumnos;
 
+// buscar
+
+use app\models\FormSearch;
+use yii\helpers\Html; // usa enconde para prevenir ataques
+
 class SiteController extends Controller
 {
     public function actionCreate(){
@@ -57,11 +62,26 @@ class SiteController extends Controller
     }
 
     public function actionView(){
-        //$table = new Alumnos();
-        //$model = $table->find()->all();
-        $model = Alumnos::find()->all(); // todos lso registros de la tabla alumnos
+        $table = new Alumnos();
+        $model = $table->find()->all();
+        //$model = Alumnos::find()->all(); // todos lso registros de la tabla alumnos
 
-        return $this->render('view',['model'=>$model]);
+        $form = new FormSearch();
+        $search =null;
+
+        if($form->load(Yii::$app->request->post())){
+            if($form->validate()){
+                $search = Html::encode($form->q); // previene ataques
+                $querry = "SELECT * FROM alumnos where id_alumno LIKE '%$search%' OR ";
+                $querry.="nombre LIKE '%$search%' OR apellidos LIKE '%$search%'";
+
+                $model = $table->findBySql($querry)->all();
+            }else{
+                $form->getErrors();
+            }
+        }
+
+        return $this->render('view',['model'=>$model,'form' => $form , 'search' =>$search]);
     }
     
     /**
