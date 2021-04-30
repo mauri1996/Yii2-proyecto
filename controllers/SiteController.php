@@ -27,6 +27,8 @@ use yii\helpers\Html; // usa enconde para prevenir ataques
 
 use yii\data\Pagination; // para paginacion
 
+use yii\helpers\Url; // para url delete
+
 class SiteController extends Controller
 {
     public function actionCreate(){
@@ -124,7 +126,32 @@ class SiteController extends Controller
         return $this->render('view',['model'=>$model,'form' => $form , 'search' =>$search, 'pages'=>$pages]);
     }
 
+    public function actionDelete(){
 
+        if(Yii::$app->request->post()){
+
+            $id_almuno = Html::encode($_POST['id_alumno']);
+            if((int)$id_almuno){
+
+                if(Alumnos::deleteAll("id_alumno=:id_alumno",[":id_alumno"=>$id_almuno])){
+                    echo "Alumno con id=".$id_almuno." eliminado con exito, redireccionando....";
+                    echo "<meta http-equiv='refresh' content='3;".Url::toRoute('site/view')."'>"; // devuelve al view si todo sale bn esperando 3 sg
+                }else{
+                    echo "Ha ocurrido un error al eliminar al alumno redireccionando....";
+                    echo "<meta http-equiv='refresh' content='3;".Url::toRoute('site/view')."'>"; // devuelve al view si no es entero id_alumno    
+                }
+
+            }else{
+                echo "Ha ocurrido un error al eliminar al alumno redireccionando....";
+                echo "<meta http-equiv='refresh' content='3;".Url::toRoute('site/view')."'>"; // devuelve al view si no es entero id_alumno
+            }
+
+        }else{
+
+            return $this->redirect(['site/delete']);
+        }
+        
+    }
     
     /**
      * {@inheritdoc}
