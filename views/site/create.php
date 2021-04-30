@@ -2,8 +2,11 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\helpers\Url;
 
+// A para ir a la vista
 ?>
+<a href="<?=Url::toRoute('site/view')?>">Ir a lista de alumnos</a> 
 
 <h1>Crear Alumno</h1>
 <h3><?=$msg?></h3>

@@ -55,6 +55,14 @@ class SiteController extends Controller
                                         'msg'=>$msg 
                                         ]);
     }
+
+    public function actionView(){
+        //$table = new Alumnos();
+        //$model = $table->find()->all();
+        $model = Alumnos::find()->all(); // todos lso registros de la tabla alumnos
+
+        return $this->render('view',['model'=>$model]);
+    }
     
     /**
      * {@inheritdoc}

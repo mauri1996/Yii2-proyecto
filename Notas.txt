@@ -12,6 +12,12 @@ descomentar la linea:
 extension=gd  -> de php.ini de php
 
 
+1-> primero crear la accion en el conrolador site q renderiza la vista
+2-> crear la vista
+3-> crear modelos necesarios
+4-> modificar la accion usando los modelos
+
+
 en sitecontroller
   public function actionSaluda()
     {
@@ -77,3 +83,25 @@ $model->load(Yii::$app->request->post() // cada vez que se hace una peticion car
 
 se instancia una tabla del modelo de Alumnos $table = new Alumnos(); 
     $table->insert() inserta el modelo en la base de datos
+
+-----------------ENRUTAR
+<a href="<?=Url::toRoute('site/create')?>">Crear nuevo Aumno</a>
+
+---------------- OBTENER TODOS LOS REGISTROS DE LA TABLA Alumnos
+    $table = new Alumnos();
+    $model = $table->find()->all();
+
+    $model = Alumnos::find()->all();
+Enviarlo a la vista y en la vsta:
+
+        <?php foreach ($model as $row):?>
+        <tr>
+            <td><?= $row->id_alumno ?></td>
+            <td><?= $row->nombre ?></td>
+            <td><?= $row->apellidos ?></td>
+            <td><?= $row->clase ?></td>
+            <td><?= $row->nota_final ?></td>
+            <td><a href="#">Editar</a></td>
+            <td><a href="#">Eliminar</a></td>
+        </tr>
+    <?php endforeach?>
