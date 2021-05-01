@@ -133,3 +133,29 @@ if(Yii::$app->request->get('id_alumno')){ // si el parametro id_alumno es enviad
 $id_alumno = Html::encode($_GET['id_alumno']); // obtener el valor de parametro enviado por get
 
 if($table->update()){ /// actualziar
+
+
+-------------Enviar correos
+config/params -> colocar el correo a donde eviar los datos adminEmail
+'senderEmail' => 'noreply@example.com',
+'senderName' => 'mauri.com mailer',
+
+'useFileTransport' => false  ///en config/web
+'transport' =>[
+    'class' => 'Swift_SmtpTransport',
+    'host'=> 'smtp.gmail.com',
+    'username' => ''// correo real',
+    'password' => ' '// password real,
+    'port'=> '587',
+    'encryption'=> 'tls'
+
+se crea una variable q sera el cuerpo del mensaje  debe llaarmse $content
+    $message = "<p> Email: ".$this->email."</p>";
+    $message .= "<p> Name: ".$this->name."</p>";
+    $message .= "<p> Subject: ".$this->subject."</p>";
+    $message .= "<p> Body: ".$this->body."</p>";
+    se modifica el if de compose para hacer refenrecia a la plantilla y se le manda el $content
+
+    Yii::$app->mailer->compose("@app/mail/layouts/html",["content"=>$message])
+
+    
