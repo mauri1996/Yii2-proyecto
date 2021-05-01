@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <td><?= $row->apellidos ?></td>
             <td><?= $row->clase ?></td>
             <td><?= $row->nota_final ?></td>
-            <td><a href="#">Editar</a></td>
+            <td><a href="<?=Url::toRoute(['site/update','id_alumno'=> $row->id_alumno])?>">Editar</a></td>
             <td>
                 <a href="#" data-toggle="modal" data-target="#id_alumno_<?= $row->id_alumno ?>">Eliminar</a>
                 <div class="modal fade" role="dialog" aria-hidden="true" id="id_alumno_<?= $row->id_alumno ?>">

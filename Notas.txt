@@ -121,3 +121,15 @@ se debe enviar la $pages a la vista y al final de la vista usar:
         LinkPager::widget([
             'pagination'=>$pages,
         ]); ?>
+
+
+------------- PASAR PARAMETROS DE VISTA A action
+<a href="<?=Url::toRoute({'site/update','id_alumno'=> $row->id_alumno])?>">Editar</a></td>
+
+BASTA CON CARGAR EL MODELO CON LOS DATOS Y ENVIARLO A LA VISTA PARA Q LOS DATOS SE REFLEJEN EN LOS INPUT
+
+if(Yii::$app->request->get('id_alumno')){ // si el parametro id_alumno es enviado por url
+
+$id_alumno = Html::encode($_GET['id_alumno']); // obtener el valor de parametro enviado por get
+
+if($table->update()){ /// actualziar

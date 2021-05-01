@@ -152,7 +152,80 @@ class SiteController extends Controller
         }
         
     }
-    
+    public function actionUpdate(){
+
+        $model = new FormAlumnos(); // simepre
+        $msg = null;
+
+
+        ///////// SI SE ENVIA UN POST
+
+        if($model->load(Yii::$app->request->post())){
+            if($model->validate()){
+                
+                $table = Alumnos::findOne($model->id_alumno);
+
+                if($table){
+
+                    $table->nombre = $model->nombre;
+                    $table->apellidos = $model->apellidos;
+                    $table->clase = $model->clase;
+                    $table->nota_final = $model->nota_final;
+
+                    if($table->update()){ // Actualizar un registro
+
+                        $msg= 'El alumno ha sido actualizado correctamente';
+                        $model->nombre = null;
+                        $model->apellidos = null;
+                        $model->clase = null;
+                        $model->nota_final = null;
+                    }else{
+                        $msg= 'Ha aocurrido un error al actualizar el registro';
+                    }
+
+                }else{
+                    $msg = "El alumno no ha sido encontrado";
+                }                
+
+            }else{
+                $model->getErrors();
+            }
+        }
+
+
+        ///////// SI SE ENVIA UN GET
+
+        if(Yii::$app->request->get('id_alumno')){ // si el parametro id_alumno es enviado
+
+            $id_alumno = Html::encode($_GET['id_alumno']);
+
+            if((int)$id_alumno){ // si es un numero entero
+
+                $table = Alumnos::findOne($id_alumno); // busca el primer elemento con esa id                                
+                
+                if($table){
+
+                    $model->id_alumno = $table->id_alumno;
+                    $model->nombre = $table->nombre;
+                    $model->apellidos = $table->apellidos;
+                    $model->clase = $table->clase;
+                    $model->nota_final = $table->nota_final;
+                    $name = $table->nombre.' '.$table->apellidos;
+
+                }else{
+                    return $this->redirect(['site/view']); 
+                }
+
+            }else{
+                return $this->redirect(['site/view']);    
+            }
+            
+        }else{            
+            return $this->redirect(['site/view']);
+        }
+
+        return $this->render('update',['model'=>$model, 'msg' =>$msg, 'name'=> $name]);
+    }
     /**
      * {@inheritdoc}
      */
