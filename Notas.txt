@@ -1,3 +1,6 @@
+
+/// jquery-manual.blogspot.com/2015/03/tutorial-de-yii2-en-espanol.html
+
 instalar composer
 composer global require "yiisoft/yii2-composer"  -> instala yii
 
@@ -158,4 +161,24 @@ se crea una variable q sera el cuerpo del mensaje  debe llaarmse $content
 
     Yii::$app->mailer->compose("@app/mail/layouts/html",["content"=>$message])
 
-    
+    ----- REGISTRO DE USUARIOS ..---
+
+    models/user
+
+    sql:
+
+    CREATE TABLE IF NOT EXISTS `users` (
+  `id` int(11) AUTO_INCREMENT NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `email` varchar(80) NOT NULL,
+  `password` varchar(250) NOT NULL,
+  `authKey` varchar(250) NOT NULL,
+  `accessToken` varchar(250) NOT NULL,
+  `activate` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+);
+
+params ----
+    'title' => 'Aplicación Yii', // titulo de la aplicacion para enviar por correo
+    'salt' => 'fsddsflj38343lj0', // encriptar contraseñas
+
