@@ -182,3 +182,16 @@ params ----
     'title' => 'Aplicación Yii', // titulo de la aplicacion para enviar por correo
     'salt' => 'fsddsflj38343lj0', // encriptar contraseñas
 
+ALTER TABLE users ADD verification_code VARCHAR(250) NOT NULL; ///nueva columna
+
+
+variable de sesion
+ $session = new Session;
+$session->open();
+
+localhost:8080/index.php?r=site/recoverpass
+
+// interesante 
+
+$msg = "Enhorabuena, password reseteado correctamente, redireccionando a la página de login ...";
+$msg .= "<meta http-equiv='refresh' content='5; " . Url::toRoute("site/login") . "'>";
