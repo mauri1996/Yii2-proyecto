@@ -31,10 +31,100 @@ use yii\helpers\Url; // para url delete
 
 /// para registros de usuarios
 use app\models\FormRegister;
+use app\models\FormResetPassword;
 use app\models\Users;
 
 class SiteController extends Controller
 {
+    
+
+    public function actionResetpassword(){
+
+        $form= new FormResetPassword();
+        if ($form->load(Yii::$app->request->post())) { // si el fomulario es enviado
+            
+            if($form->validate()){
+                $user = Users::find()                    
+                    ->where("id=:id", [":id" => Html::encode($_GET["id"])])
+                    ->andWhere("authKey=:authKey", [":authKey" => $_GET["authKey"]])
+                    ->one();
+                                    
+                if($user){
+                    //$table->password = $form->password;                    
+                    $user->password = crypt($form->password, Yii::$app->params["salt"]);                    
+                    //Creamos una cookie para autenticar al usuario cuando decida recordar la sesión, esta misma
+                    //clave será utilizada para activar el usuario
+                    $user->authKey = $this->randKey("abcdef0123456789", 200);
+                    //Creamos un token de acceso único para el usuario
+                    $user->accessToken = $this->randKey("abcdef0123456789", 200);
+
+                    if($user->update()){
+                        $msg = 'Contraseña actualizada con exito';
+                        $form -> password = null;
+                        $form -> password_repeat = null;
+                        return $this->render('resetpasword',['model'=>$form,'msg'=>$msg]);
+
+                    }else{
+                        $msg = 'Ha ocurrido un error al actualizar el registro';
+                        return $this->render('resetpasword',['model'=>$form,'msg'=>$msg]);
+                    }
+
+                }else{
+                    $msg = 'Usuario no encotrado';
+                    return $this->render('resetpasword',['model'=>$form,'msg'=>$msg]);
+                }
+
+            }else{
+                $form->getErrors();
+            }
+        }
+
+        $table = new Users;
+        $msg = null;
+        if (Yii::$app->request->get()) {
+            //Obtenemos el valor de los parámetros get
+            
+
+            if(isset($_GET["id"]) or isset($_GET["authKey"])){
+                $id = Html::encode($_GET["id"]);
+                $authKey = $_GET["authKey"];
+            }else{
+                return $this->redirect(["site/login"]);
+            }            
+            
+
+            if ((int) $id) {
+                //Realizamos la consulta para obtener el registro
+                $user = $table
+                    ->find()
+                    ->where("id=:id", [":id" => $id])
+                    ->andWhere("authKey=:authKey", [":authKey" => $authKey]);
+
+                //Si el registro existe
+                if ($user->count() == 1) {
+                    
+                    $model = new FormResetPassword();
+                    $model-> password=null;
+                    $model-> password_repeat=null;
+                    $model->id_user = $id;
+                    $model-> authKey= $authKey;                    
+
+                    return $this->render('resetpasword',['model'=>$model,'msg'=>$msg]);
+
+                } else //Si no existe redireccionamos a login
+                {
+                    return $this->redirect(["site/login"]);
+                }
+            } else //Si id no es un número entero redireccionamos a login
+            {
+                return $this->redirect(["site/login"]);
+            }
+        }
+
+
+        
+    }
+
     public function actionCreate()
     {
         $model = new FormAlumnos();

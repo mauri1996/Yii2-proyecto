@@ -182,3 +182,10 @@ params ----
     'title' => 'Aplicación Yii', // titulo de la aplicacion para enviar por correo
     'salt' => 'fsddsflj38343lj0', // encriptar contraseñas
 
+
+
+    http://localhost:8080/index.php?r=site/resetpassword&id=1&authKey=3e2a5971c945ccae94423a173c6d3909828a547efb092a1c0b94aeac0b18efde890e1eb9f4e0f9510300e794962bbdf97695f20e78de2bb1e3a2f7a806e3b46ad4754a5dbd3385d05072cf9c1f9243f0b767e61ef5ebd7b2fb19251248eca8bd3e15094e
+
+
+PRIMERO EL POST LUEGO EL GET
+pilas el ->one luego de una consulta
