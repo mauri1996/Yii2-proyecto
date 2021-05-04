@@ -39,8 +39,99 @@ use yii\web\Session; // trabajar con sesiones
 use app\models\FormRecoverPass;
 use app\models\FormResetPass;
 
+/// para acceder a los roles
+use app\models\User;
+
+
+/// subir archivos
+use app\models\FormUpload;
+use yii\web\UploadedFile;
+
+
 class SiteController extends Controller
 {
+    private function downloadFile($dir, $file, $extensions = [])
+    {
+        //Si el directorio existe
+        if (is_dir($dir)) {
+            //Ruta absoluta del archivo
+            $path = $dir . $file;
+
+            //Si el archivo existe
+            if (is_file($path)) {
+                //Obtener información del archivo
+                $file_info = pathinfo($path);
+                //Obtener la extensión del archivo
+                $extension = $file_info["extension"];
+
+                if (is_array($extensions)) {
+                    //Si el argumento $extensions es un array
+                    //Comprobar las extensiones permitidas
+                    foreach ($extensions as $e) {
+                        //Si la extension es correcta
+                        if ($e === $extension) {
+                            //Procedemos a descargar el archivo
+                            // Definir headers
+                            $size = filesize($path);
+                            header("Content-Type: application/force-download");
+                            header("Content-Disposition: attachment; filename=$file");
+                            header("Content-Transfer-Encoding: binary");
+                            header("Content-Length: " . $size);
+                            // Descargar archivo
+                            readfile($path);
+                            //Correcto
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        //Ha ocurrido un error al descargar el archivo
+        return false;
+    }
+
+    public function actionDownload()
+    {
+        if (Yii::$app->request->get("file")) {
+            //Si el archivo no se ha podido descargar
+            //downloadFile($dir, $file, $extensions=[])
+            if (!$this->downloadFile("archivos/", Html::encode($_GET["file"]), ["pdf", "txt", "doc"])) {
+                //Mensaje flash para mostrar el error
+                Yii::$app->session->setFlash("errordownload");
+            }
+        }
+
+        return $this->render("download");
+    }
+
+    /// ----------- SUBIR ARCHIVOS --------------
+    public function actionUpload()
+    {
+        $model = new FormUpload;
+        $msg = null;
+
+        if ($model->load(Yii::$app->request->post())) {
+            $model->file = UploadedFile::getInstances($model, 'file');
+
+            if ($model->file && $model->validate()) {
+                foreach ($model->file as $file) {
+                    $file->saveAs('archivos/' . $file->baseName . '.' . $file->extension);
+                    $msg = "<p><strong class='label label-info'>Enhorabuena, subida realizada con éxito</strong></p>";
+                }
+            }
+        }
+        return $this->render("upload", ["model" => $model, "msg" => $msg]);
+    }
+
+    public function actionUser()
+    {
+        return $this->render('user');
+    }
+
+    public function actionAdmin()
+    {
+        return $this->render('admin');
+    }
     public function actionCreate()
     {
         $model = new FormAlumnos();
@@ -239,15 +330,40 @@ class SiteController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['logout'],
+                'only' => ['logout', 'user', 'admin'], // todas las acciones q van a ser controladas
                 'rules' => [
                     [
-                        'actions' => ['logout'],
+                        //El administrador tiene permisos sobre las siguientes acciones
+                        'actions' => ['logout', 'admin'],
+                        //Esta propiedad establece que tiene permisos
                         'allow' => true,
+                        //Usuarios autenticados, el signo ? es para invitados
                         'roles' => ['@'],
+                        //Este método nos permite crear un filtro sobre la identidad del usuario
+                        //y así establecer si tiene permisos o no
+                        'matchCallback' => function ($rule, $action) {
+                            //Llamada al método que comprueba si es un administrador
+                            return User::isUserAdmin(Yii::$app->user->identity->id);
+                        },
+                    ],
+                    [
+                        //Los usuarios simples tienen permisos sobre las siguientes acciones
+                        'actions' => ['logout', 'user'],
+                        //Esta propiedad establece que tiene permisos
+                        'allow' => true,
+                        //Usuarios autenticados, el signo ? es para invitados
+                        'roles' => ['@'],
+                        //Este método nos permite crear un filtro sobre la identidad del usuario
+                        //y así establecer si tiene permisos o no
+                        'matchCallback' => function ($rule, $action) {
+                            //Llamada al método que comprueba si es un usuario simple
+                            return User::isUserSimple(Yii::$app->user->identity->id);
+                        },
                     ],
                 ],
             ],
+            //Controla el modo en que se accede a las acciones, en este ejemplo a la acción logout
+            //sólo se puede acceder a través del método post
             'verbs' => [
                 'class' => VerbFilter::className(),
                 'actions' => [
@@ -288,40 +404,66 @@ class SiteController extends Controller
      *
      * @return Response|string
      */
+    // public function actionLogin()
+    // {
+    //     if (!Yii::$app->user->isGuest) {
+    //         return $this->goHome();
+    //     }
+
+    //     $model = new LoginForm();
+    //     if ($model->load(Yii::$app->request->post()) && $model->login()) {
+    //         return $this->goBack();
+    //     }
+    //     // $model= new LoginForm();
+    //     // if($model->load(Yii::$app->request->post())){
+    //     //     if($model->validate()){
+    //     //         $user = Users::find()
+    //     //                         ->where("username=:username", [":username" => $model->username]);
+    //     //         if($user){
+
+    //     //             if(){
+
+    //     //             }
+
+    //     //         }else{
+    //     //             $msg = 'Usuario no encontrado';
+    //     //         }
+
+    //     //     }else{
+    //     //         $model->getErrors();
+    //     //     }
+    //     // }
+
+    //     $model->password = '';
+    //     return $this->render('login', [
+    //         'model' => $model
+    //     ]);
+    // }
+
     public function actionLogin()
     {
-        if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
+        if (!\Yii::$app->user->isGuest) {
+
+            if (User::isUserAdmin(Yii::$app->user->identity->id)) {
+                return $this->redirect(["site/admin"]);
+            } else {
+                return $this->redirect(["site/user"]);
+            }
         }
 
         $model = new LoginForm();
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+
+            if (User::isUserAdmin(Yii::$app->user->identity->id)) {
+                return $this->redirect(["site/admin"]);
+            } else {
+                return $this->redirect(["site/user"]);
+            }
+        } else {
+            return $this->render('login', [
+                'model' => $model,
+            ]);
         }
-        // $model= new LoginForm();
-        // if($model->load(Yii::$app->request->post())){
-        //     if($model->validate()){
-        //         $user = Users::find()
-        //                         ->where("username=:username", [":username" => $model->username]);
-        //         if($user){
-
-        //             if(){
-
-        //             }
-
-        //         }else{
-        //             $msg = 'Usuario no encontrado';
-        //         }
-
-        //     }else{
-        //         $model->getErrors();
-        //     }
-        // }
-
-        $model->password = '';
-        return $this->render('login', [
-            'model' => $model
-        ]);
     }
 
     /**

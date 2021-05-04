@@ -195,3 +195,46 @@ localhost:8080/index.php?r=site/recoverpass
 
 $msg = "Enhorabuena, password reseteado correctamente, redireccionando a la página de login ...";
 $msg .= "<meta http-equiv='refresh' content='5; " . Url::toRoute("site/login") . "'>";
+
+-----------ROLES------------
+
+ALTER TABLE `users` ADD `role` INT NOT NULL DEFAULT '1';  // coloca por defencto a todos 1 siendo usuario normal
+
+en rules dentro de BEHAVIOURS -> limita que usuario puedo o no acceder a una accion
+
+[
+    //El administrador tiene permisos sobre las siguientes acciones
+    'actions' => ['logout', 'admin'],
+    //Esta propiedad establece que tiene permisos
+    'allow' => true,
+    //Usuarios autenticados, el signo ? es para invitados
+    'roles' => ['@'],
+    //Este método nos permite crear un filtro sobre la identidad del usuario
+    //y así establecer si tiene permisos o no
+    'matchCallback' => function ($rule, $action) {
+        //Llamada al método que comprueba si es un administrador
+        return User::isUserAdmin(Yii::$app->user->identity->id);
+    },
+],
+
+si un usuario q no es admin entra al site/admin le dara un error 403
+
+
+http://localhost:8080/index.php?r=site/logout -> metodo no permitido xq solo esta habilitado por post no por get
+se modifica dentro de BEHAVIOURS las acciones q pueden o no ser get/post
+
+'verbs' => [
+                'class' => VerbFilter::className(),
+                'actions' => [
+                    'logout' => ['post'],
+                    // demas acciones
+                ],
+            ],
+
+'only' => ['logout', 'user', 'admin','view'], // todas las acciones q van a ser controladas
+
+
+--------- SUBIR ARCHIVOS ---
+se debe tener una carpeta llamada archivos dentro de web, se guardaran ahi las cosas
+
+
